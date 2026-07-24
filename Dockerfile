@@ -53,21 +53,21 @@ ARG S6_OVERLAY_AARCH64_SHA256=0952056ff913482163cc30e35b2e944b507ba1025d78f5becb
 ARG S6_OVERLAY_SYMLINKS_SHA256=a60dc5235de3ecbcf874b9c1f18d73263ab99b289b9329aa950e8729c4789f0e
 RUN set -eu; \
     case "${TARGETARCH:-amd64}" in \
-        amd64) s6_arch="x86_64"; s6_arch_sha="${S6_OVERLAY_X86_64_SHA256}" ;; \
-        arm64) s6_arch="aarch64"; s6_arch_sha="${S6_OVERLAY_AARCH64_SHA256}" ;; \
-        *) echo "Unsupported TARGETARCH=${TARGETARCH} for s6-overlay" >&2; exit 1 ;; \
+    amd64) s6_arch="x86_64"; s6_arch_sha="${S6_OVERLAY_X86_64_SHA256}" ;; \
+    arm64) s6_arch="aarch64"; s6_arch_sha="${S6_OVERLAY_AARCH64_SHA256}" ;; \
+    *) echo "Unsupported TARGETARCH=${TARGETARCH} for s6-overlay" >&2; exit 1 ;; \
     esac; \
     base="https://github.com/just-containers/s6-overlay/releases/download/v${S6_OVERLAY_VERSION}"; \
     curl -fsSL --retry 3 -o /tmp/s6-overlay-noarch.tar.xz \
-        "${base}/s6-overlay-noarch.tar.xz"; \
+    "${base}/s6-overlay-noarch.tar.xz"; \
     curl -fsSL --retry 3 -o /tmp/s6-overlay-symlinks-noarch.tar.xz \
-        "${base}/s6-overlay-symlinks-noarch.tar.xz"; \
+    "${base}/s6-overlay-symlinks-noarch.tar.xz"; \
     curl -fsSL --retry 3 -o /tmp/s6-overlay-arch.tar.xz \
-        "${base}/s6-overlay-${s6_arch}.tar.xz"; \
+    "${base}/s6-overlay-${s6_arch}.tar.xz"; \
     { \
-        printf '%s  %s\n' "${S6_OVERLAY_NOARCH_SHA256}" /tmp/s6-overlay-noarch.tar.xz; \
-        printf '%s  %s\n' "${s6_arch_sha}" /tmp/s6-overlay-arch.tar.xz; \
-        printf '%s  %s\n' "${S6_OVERLAY_SYMLINKS_SHA256}" /tmp/s6-overlay-symlinks-noarch.tar.xz; \
+    printf '%s  %s\n' "${S6_OVERLAY_NOARCH_SHA256}" /tmp/s6-overlay-noarch.tar.xz; \
+    printf '%s  %s\n' "${s6_arch_sha}" /tmp/s6-overlay-arch.tar.xz; \
+    printf '%s  %s\n' "${S6_OVERLAY_SYMLINKS_SHA256}" /tmp/s6-overlay-symlinks-noarch.tar.xz; \
     } > /tmp/s6-overlay.sha256; \
     sha256sum -c /tmp/s6-overlay.sha256; \
     tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz; \
@@ -136,8 +136,8 @@ ENV npm_config_install_links=false
 
 RUN npm install --prefer-offline --no-audit --fetch-retries=5 && \
     for i in 1 2 3; do \
-        npx playwright install --with-deps chromium --only-shell && break || \
-        { [ "$i" = 3 ] && exit 1; echo "playwright install failed (attempt $i); retrying in 10s"; sleep 10; }; \
+    npx playwright install --with-deps chromium --only-shell && break || \
+    { [ "$i" = 3 ] && exit 1; echo "playwright install failed (attempt $i); retrying in 10s"; sleep 10; }; \
     done && \
     npm cache clean --force
 
@@ -248,7 +248,7 @@ RUN mkdir -p /opt/hermes/bin && \
 # every published image has it.
 ARG HERMES_GIT_SHA=
 RUN if [ -n "${HERMES_GIT_SHA}" ]; then \
-        printf '%s\n' "${HERMES_GIT_SHA}" > /opt/hermes/.hermes_build_sha; \
+    printf '%s\n' "${HERMES_GIT_SHA}" > /opt/hermes/.hermes_build_sha; \
     fi
 
 # ---------- s6-overlay service wiring ----------
@@ -269,7 +269,7 @@ COPY docker/s6-rc.d/ /etc/s6-overlay/s6-rc.d/
 # (the /run/service/ scandir is tmpfs and wiped on restart). Phase 4.
 RUN mkdir -p /etc/cont-init.d && \
     printf '#!/command/with-contenv sh\nexec /opt/hermes/docker/stage2-hook.sh\n' \
-        > /etc/cont-init.d/01-hermes-setup && \
+    > /etc/cont-init.d/01-hermes-setup && \
     chmod +x /etc/cont-init.d/01-hermes-setup
 COPY --chmod=0755 docker/cont-init.d/015-supervise-perms /etc/cont-init.d/015-supervise-perms
 COPY --chmod=0755 docker/cont-init.d/02-reconcile-profiles /etc/cont-init.d/02-reconcile-profiles
@@ -335,7 +335,7 @@ ENV HERMES_LAZY_INSTALL_TARGET=/opt/data/lazy-packages
 # every other consumer.
 ENV PATH="/opt/hermes/bin:/opt/hermes/.venv/bin:/opt/data/.local/bin:${PATH}"
 RUN mkdir -p /opt/data
-VOLUME [ "/opt/data" ]
+# VOLUME [ "/opt/data" ] NOT NEEDED FOR RAILWAY
 
 # s6-overlay's /init is PID 1. It sets up the supervision tree, runs
 # /etc/cont-init.d/* (our stage2 hook), starts s6-rc services
