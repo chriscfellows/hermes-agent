@@ -334,18 +334,12 @@ RUN mkdir -p /opt/hermes/bin && \
 # (.github/workflows/docker.yml) passes ${{ github.sha }} so
 # every published image has it.
 ARG HERMES_GIT_SHA=
-<<<<<<< HEAD
-RUN if [ -n "${HERMES_GIT_SHA}" ]; then \
-    printf '%s\n' "${HERMES_GIT_SHA}" > /opt/hermes/.hermes_build_sha; \
-    fi
-=======
 RUN set -eu; \
     if [ -n "${HERMES_GIT_SHA}" ]; then \
         printf '%s\n' "${HERMES_GIT_SHA}" > /opt/hermes/.hermes_build_sha; \
     fi; \
     mkdir -p /etc/hermes; \
     HERMES_GIT_SHA="${HERMES_GIT_SHA}" python3 -c 'import json, os, pathlib, tomllib; project = tomllib.loads(pathlib.Path("/opt/hermes/pyproject.toml").read_text(encoding="utf-8"))["project"]; marker = pathlib.Path("/etc/hermes/image-provenance.json"); marker.write_text(json.dumps({"schema": 1, "deployment_kind": "image", "manager": "docker", "image": "nousresearch/hermes-agent", "version": project["version"], "revision": os.environ.get("HERMES_GIT_SHA") or None}, sort_keys=True, separators=(",", ":")) + "\n", encoding="utf-8"); marker.chmod(0o444)'
->>>>>>> upstream/main
 
 # ---------- s6-overlay service wiring ----------
 # Static services declared at build time: main-hermes + dashboard.
